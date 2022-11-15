@@ -2,8 +2,37 @@ import { FlowNetwork } from "./ford-fulkerson/FlowNetwork";
 import { Graphviz } from "graphviz-react";
 import { fordFulkerson } from "./ford-fulkerson/FordFulkerson";
 import { DirectedEdge } from "./ford-fulkerson/DirectedEdge";
+import React, { useState } from "react";
 
 function App() {
+  const graph = generateGraph();
+  fordFulkerson(graph);
+  const pred = (e: DirectedEdge) =>
+    e.flow > 0 && e.from !== graph.source && e.to !== graph.sink;
+  const dotString = graph.generateDOTstring(1, 2, pred, "red", "black");
+
+  const [selectedFile, setSelectedFile] = useState();
+  const [isFilePicked, setIsFiledPicked] = useState(false);
+
+  const changeHandler = (event) => {
+    setSelectedFile(event.target.files[0]);
+    setIsFiledPicked(true);
+  };
+
+  const handleSubmission = () => {};
+
+  return (
+    <div>
+      <input type="file" name="file" onChange={changeHandler} />
+      <div>
+        <button onClick={handleSubmission}>Submit</button>
+      </div>
+      <Graphviz dot={dotString} options={{ engine: "neato" }} />
+    </div>
+  );
+}
+
+function generateGraph(): FlowNetwork {
   const graph: FlowNetwork = new FlowNetwork(
     "source",
     [0, 3.5],
@@ -49,16 +78,6 @@ function App() {
   graph.addEdge(0, 1, J4, T);
   graph.addEdge(0, 1, J5, T);
   graph.addEdge(0, 1, J6, T);
-
-  fordFulkerson(graph);
-
-  const pred = (e: DirectedEdge) => e.flow > 0 && e.from !== S && e.to !== T;
-
-  const dotString = graph.generateDOTstring(1, 2, pred, "red", "black");
-
-  console.log(dotString);
-
-  return <Graphviz dot={dotString} options={{ engine: "neato" }} />;
+  return graph;
 }
-
 export default App;
