@@ -16,8 +16,8 @@ export class FlowNetwork {
   source: Vertex;
   sink: Vertex;
 
-  protected vertexes: [Vertex, Position][] = [];
-  protected edges = new Set<DirectedEdge>();
+  vertexes = new Map<string, [Vertex, Position]>();
+  edges = new Set<DirectedEdge>();
 
   constructor(
     sourceValue: string,
@@ -38,7 +38,7 @@ export class FlowNetwork {
    */
   addVertex(value: string, pos: Position): Vertex {
     const newVertex = new Vertex(value);
-    this.vertexes.push([newVertex, pos]);
+    this.vertexes.set(value, [newVertex, pos]);
     return newVertex;
   }
 
@@ -51,12 +51,20 @@ export class FlowNetwork {
    * @param to the vertex that this edge points towards
    * @returns the newly created edge
    */
-  addEdge(flow: number, capacity: number, from: Vertex, to: Vertex) {
+  addEdge(flow: number, capacity: number, fromLabel: string, toLabel: string) {
+    const from = this.vertexes.get(fromLabel);
+    const to = this.vertexes.get(toLabel);
+
+    if (!from || !to) {
+      console.error(`Failed to find label ${!from ? fromLabel : toLabel}`);
+      return;
+    }
+
     const newEdge = new DirectedEdge(flow, capacity, from, to);
 
     this.edges.add(newEdge);
-    from.edges.add(newEdge);
-    to.edges.add(newEdge);
+    from[0].edges.add(newEdge);
+    to[0].edges.add(newEdge);
 
     return newEdge;
   }
@@ -80,7 +88,9 @@ export class FlowNetwork {
   ): string {
     let dotString = "";
 
-    for (const [v, [x, y]] of this.vertexes) {
+    for (const key in this.vertexes) {
+      const [v, [x, y]] = this.vertexes.get(key) as [Vertex, Position];
+
       dotString += `${v.value} [label="${v.value}" pos="${x * colSep},${
         y * rowSep
       }!"]\n`;

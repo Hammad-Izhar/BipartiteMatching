@@ -3,31 +3,44 @@ import { Graphviz } from "graphviz-react";
 import { fordFulkerson } from "./ford-fulkerson/FordFulkerson";
 import { DirectedEdge } from "./ford-fulkerson/DirectedEdge";
 import React, { useState } from "react";
+import { parse } from "./ford-fulkerson/Parser";
 
 function App() {
+  const reader = new FileReader();
+  reader.onerror = () => console.error(reader.error);
+  reader.onload = async () => {
+    if (!reader.result || reader.result instanceof ArrayBuffer) return;
+    return await parse(reader.result);
+  };
+
   const graph = generateGraph();
   fordFulkerson(graph);
   const pred = (e: DirectedEdge) =>
     e.flow > 0 && e.from !== graph.source && e.to !== graph.sink;
   const dotString = graph.generateDOTstring(1, 2, pred, "red", "black");
 
-  const [selectedFile, setSelectedFile] = useState();
-  const [isFilePicked, setIsFiledPicked] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File>();
+  const [submittedFile, setSubmittedFile] = useState(false);
 
-  const changeHandler = (event) => {
-    setSelectedFile(event.target.files[0]);
-    setIsFiledPicked(true);
+  const changeHandler: React.ChangeEventHandler<HTMLInputElement> = (event) => {
+    const files = event.target.files;
+    if (!files) return;
+    setSelectedFile(files[0]);
   };
 
-  const handleSubmission = () => {};
+  const handleSubmission = () => {
+    if (!selectedFile) return;
+    reader.readAsText(selectedFile);
+    setSubmittedFile(true);
+  };
 
   return (
     <div>
       <input type="file" name="file" onChange={changeHandler} />
-      <div>
-        <button onClick={handleSubmission}>Submit</button>
-      </div>
-      <Graphviz dot={dotString} options={{ engine: "neato" }} />
+      <button onClick={handleSubmission}>Submit</button>
+      {submittedFile && (
+        <Graphviz dot={dotString} options={{ engine: "neato" }} />
+      )}
     </div>
   );
 }
