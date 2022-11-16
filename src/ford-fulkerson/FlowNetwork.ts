@@ -25,20 +25,26 @@ export class FlowNetwork {
     sinkValue: string,
     sinkPosition: Position
   ) {
-    this.source = this.addVertex(sourceValue, sourcePosition);
-    this.sink = this.addVertex(sinkValue, sinkPosition);
+    this.source = this.addVertex(sourceValue, sourcePosition) as Vertex;
+    this.sink = this.addVertex(sinkValue, sinkPosition) as Vertex;
   }
 
   /**
-   * Adds a vertex to the flow network
+   * Adds a vertex to the flow network. If the label already exists in the graph, return the instance of that vertex
    *
    * @param value a label/value for the vertex in the flow network
    * @param pos the position of the vertex in space
-   * @returns the created created vertex
+   * @returns the newly created vertex or null if the vertex already existed
    */
-  addVertex(value: string, pos: Position): Vertex {
+  addVertex(value: string, pos: Position): Vertex | null {
+    if (this.vertexes.has(value)) {
+      return null;
+    }
+
     const newVertex = new Vertex(value);
+
     this.vertexes.set(value, [newVertex, pos]);
+
     return newVertex;
   }
 
@@ -47,8 +53,8 @@ export class FlowNetwork {
    *
    * @param flow the amount of flow through the edge, should be <= capacity
    * @param capacity the capacity of the edge
-   * @param from the vertex that this edge originates from
-   * @param to the vertex that this edge points towards
+   * @param fromLabel the vertex that this edge originates from
+   * @param toLabel the vertex that this edge points towards
    * @returns the newly created edge
    */
   addEdge(flow: number, capacity: number, fromLabel: string, toLabel: string) {
@@ -60,11 +66,14 @@ export class FlowNetwork {
       return;
     }
 
-    const newEdge = new DirectedEdge(flow, capacity, from, to);
+    const [fromVertex] = from;
+    const [toVertex] = to;
+
+    const newEdge = new DirectedEdge(flow, capacity, fromVertex, toVertex);
 
     this.edges.add(newEdge);
-    from[0].edges.add(newEdge);
-    to[0].edges.add(newEdge);
+    fromVertex.edges.add(newEdge);
+    toVertex.edges.add(newEdge);
 
     return newEdge;
   }
@@ -105,9 +114,9 @@ export class FlowNetwork {
     }
 
     dotString = `digraph FlowNetwork {
-     rankdir="LR";
-     node [shape=rectangle style=rounded fixedsize=false]
-
+    rankdir="LR";
+    node [shape=rectangle style=rounded fixedsize=false];
+    overlap=false;
     ${dotString}
 }`;
 
