@@ -3,7 +3,7 @@ import csv from "csvtojson";
 
 export async function parse(csvString: string): Promise<FlowNetwork> {
   const results = await csv().fromString(csvString);
-  const graph = new FlowNetwork("source", [0, 0], "sink", [3, 0]);
+  const graph = new FlowNetwork("source", [0, 0], "sink", [0, 3]);
 
   let namePosition = 0;
   let preferencePosition = 0;
@@ -20,12 +20,13 @@ export async function parse(csvString: string): Promise<FlowNetwork> {
       graph.addEdge(0, 1, name, preference);
 
       if (prefVertex != null) {
-        graph.addEdge(0, 1, preference, "sink");
+        graph.addEdge(0, 20, preference, "sink");
         preferencePosition++;
       }
     }
 
     namePosition++;
   }
+
   return graph;
 }

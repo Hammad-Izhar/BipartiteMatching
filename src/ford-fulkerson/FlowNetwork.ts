@@ -97,9 +97,7 @@ export class FlowNetwork {
   ): string {
     let dotString = "";
 
-    for (const key in this.vertexes) {
-      const [v, [x, y]] = this.vertexes.get(key) as [Vertex, Position];
-
+    for (const [, [v, [x, y]]] of this.vertexes) {
       dotString += `${v.value} [label="${v.value}" pos="${x * colSep},${
         y * rowSep
       }!"]\n`;
@@ -114,7 +112,7 @@ export class FlowNetwork {
     }
 
     dotString = `digraph FlowNetwork {
-    rankdir="LR";
+    rankdir="TB";
     node [shape=rectangle style=rounded fixedsize=false];
     overlap=false;
     ${dotString}

@@ -25,14 +25,17 @@ function App() {
 
   reader.onload = async () => {
     if (!reader.result || reader.result instanceof ArrayBuffer) return;
+
     const graph = await parse(reader.result);
 
     fordFulkerson(graph);
+
     const pred = (e: DirectedEdge) =>
       e.flow > 0 && e.from !== graph.source && e.to !== graph.sink;
-    setDotString(graph.generateDOTstring(1, 2, pred, "red", "black"));
 
-    console.log(dotString);
+    setDotString(graph.generateDOTstring(1, 1, pred, "red", "black"));
+
+    console.log(graph.generateDOTstring(1, 1, pred, "red", "black"));
   };
 
   return (
@@ -40,7 +43,7 @@ function App() {
       <input type="file" name="file" onChange={changeHandler} />
       <button onClick={handleSubmission}>Submit</button>
       {dotString !== undefined && (
-        <Graphviz dot={dotString} options={{ engine: "dot" }} />
+        <Graphviz dot={dotString} options={{ engine: "neato" }} />
       )}
     </div>
   );
