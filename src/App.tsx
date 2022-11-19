@@ -1,7 +1,9 @@
+import React, { useState } from "react";
+import UploadButton from "./components/UploadButton";
+
 import { Graphviz } from "graphviz-react";
 import { fordFulkerson } from "./ford-fulkerson/FordFulkerson";
 import { DirectedEdge } from "./ford-fulkerson/DirectedEdge";
-import React, { useState } from "react";
 import { parse } from "./ford-fulkerson/Parser";
 
 function App() {
@@ -38,14 +40,6 @@ function App() {
     console.log(graph.generateDOTstring(1, 1, pred, "red", "black"));
   };
 
-  return (
-    <div>
-      <input type="file" name="file" onChange={changeHandler} />
-      <button onClick={handleSubmission}>Submit</button>
-      {dotString !== undefined && (
-        <Graphviz dot={dotString} options={{ engine: "neato" }} />
-      )}
-    </div>
-  );
+  return <UploadButton />;
 }
 export default App;
